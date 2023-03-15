@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import Review, Comment
+from reviews.models import Review, Comment, Category, Genre, Title
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
@@ -54,3 +54,27 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
         read_only = ('review',)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class TitleGetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Title
+        fields = '__all__'
