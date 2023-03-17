@@ -1,11 +1,24 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from users.models import User
 
 
+def validate_username(value):
+    if value.lower() == 'me':
+        raise serializers.ValidationError(
+            'Использовать логин "me" запрещено'
+        )
+    return value
+
+
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(
+        required=True,
+        validators=[
+            validate_username, UniqueValidator(queryset=User.objects.all())
+        ]
+    )
 
     class Meta:
         model = User
@@ -15,14 +28,30 @@ class UserSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=User.objects.all(),
-                fields=('username', 'email'),
-                message='Уже подписан на этого пользователя'
+                fields=('username', 'email')
             )
         ]
 
-    def validate_username(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Использовать логин "me" запрещено'
-            )
-        return username
+
+class TokenSerializers(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username]
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
+class SignUpSerializers(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username]
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
