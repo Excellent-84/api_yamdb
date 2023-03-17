@@ -2,77 +2,8 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from users.models import User
 
-class Review(models.Model):
-    """Отзывы пользователей."""
-    title = models.ForeignKey(
-        Title, on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Рецензируемое произведение'
-    )
-    text = models.TextField(
-        verbose_name='Текст отзыва'
-    )
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор отзыва',
-    )
-    score = models.IntegerField(
-        'Оценка (от 1 до 10)',
-        validators=[
-            MaxValueValidator(10),
-            MinValueValidator(1)
-        ]
-    )
-    pub_date = models.DateField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
-
-    class Meta:
-        constrains = (
-            models.UniqueConstraint(
-                fields=['title', 'author'], name='title_one_review'
-            ),
-        )
-        ordering = ('title',)
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-
-    def __str__(self):
-        return self.text
-
-
-class Comment(models.Model):
-    """Комментарии к отзывам."""
-
-    review = models.ForeignKey(
-        Review, on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Комментируемый отзыв'
-    )
-    text = models.TextField(
-        max_length=2000,
-        verbose_name='Текст комментария'
-    )
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор комментария'
-    )
-    pub_date = models.DateTimeField(
-        default=timezone.now,
-        verbose_name='Дата создания комментария'
-    )
-
-    class Meta:
-        ordering = ('review', 'author')
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
-
-    def __str__(self):
-        return self.text
 
 class Category(models.Model):
     name = models.CharField('Имя', max_length=200)
@@ -110,3 +41,76 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return self.title.name + ' - ' + self.genre.name
+
+
+class Review(models.Model):
+    """Отзывы пользователей."""
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Рецензируемое произведение'
+    )
+    text = models.TextField(
+        verbose_name='Текст отзыва'
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Автор отзыва',
+    )
+    score = models.IntegerField(
+        'Оценка (от 1 до 10)',
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1)
+        ]
+    )
+    pub_date = models.DateField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
+
+    def __str__(self):
+        return self.text
+
+
+class Comment(models.Model):
+    """Комментарии к отзывам."""
+
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Комментируемый отзыв'
+    )
+    text = models.TextField(
+        max_length=2000,
+        verbose_name='Текст комментария'
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор комментария'
+    )
+    pub_date = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Дата создания комментария'
+    )
+
+    class Meta:
+        ordering = ('review', 'author')
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text
