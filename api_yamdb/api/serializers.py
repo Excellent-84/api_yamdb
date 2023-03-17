@@ -57,11 +57,6 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     )
     score = serializers.IntegerField(max_value=10, min_value=1)
 
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only = ('id',)
-
     def validate(self, data):
         request = self.context.get('request')
 
@@ -81,6 +76,11 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         if value > year:
             raise serializers.ValidationError('Проверьте год выпуска!')
         return value
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only = ('id',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
