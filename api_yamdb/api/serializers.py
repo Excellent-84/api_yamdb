@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import Review, Comment, Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -25,7 +25,9 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
