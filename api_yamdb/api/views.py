@@ -21,6 +21,7 @@ class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
@@ -30,6 +31,7 @@ class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -39,7 +41,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         .annotate(rating=Avg("reviews__score"))
         .order_by('-year', 'name')
     )
-    filter_backends = DjangoFilterBackend
+    filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
