@@ -2,17 +2,20 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters, permissions
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.mixins import (ListModelMixin, CreateModelMixin, DestroyModelMixin)
+from rest_framework.mixins import (ListModelMixin, CreateModelMixin,
+                                   DestroyModelMixin)
 
 from .permissions import IsAuthorOrModerOrAdmin, IsAdminOrReadOnly
-from .serializers import (ReviewCreateSerializer, CommentSerializer, CategorySerializer, GenreSerializer,
+from .serializers import (ReviewCreateSerializer, CommentSerializer,
+                          CategorySerializer, GenreSerializer,
                           TitleGetSerializer, TitlePostSerializer)
 from .filter import TitleFilter
 
 from reviews.models import Review, Category, Genre, Title
 
 
-class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
@@ -20,7 +23,8 @@ class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, views
     search_fields = ('name',)
 
 
-class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)

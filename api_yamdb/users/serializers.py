@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
@@ -9,12 +11,15 @@ def validate_username(value):
         raise serializers.ValidationError(
             'Использовать логин "me" запрещено'
         )
+    if not re.match(r'^[\w.@+-]+\Z', value):
+        raise serializers.ValidationError('Недопустимые символы в логине')
     return value
 
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
+        max_length=150,
         validators=[
             validate_username, UniqueValidator(queryset=User.objects.all())
         ]
@@ -39,6 +44,7 @@ class TokenSerializers(serializers.ModelSerializer):
         max_length=150,
         validators=[validate_username]
     )
+    confirmation_code = serializers.CharField(required=True)
 
     class Meta:
         model = User
