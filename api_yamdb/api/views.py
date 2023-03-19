@@ -1,17 +1,16 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters, permissions
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.mixins import (ListModelMixin, CreateModelMixin,
-                                   DestroyModelMixin)
+from rest_framework import filters, permissions, viewsets
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 
-from .permissions import IsAuthorOrModerOrAdmin, IsAdminOrReadOnly
-from .serializers import (ReviewCreateSerializer, CommentSerializer,
-                          CategorySerializer, GenreSerializer,
-                          TitleGetSerializer, TitlePostSerializer)
 from .filter import TitleFilter
-
-from reviews.models import Review, Category, Genre, Title
+from .permissions import IsAdminOrReadOnly, IsAuthorOrModerOrAdmin
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewCreateSerializer,
+                          TitleGetSerializer, TitlePostSerializer)
+from reviews.models import Category, Genre, Review, Title
 
 
 class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,

@@ -1,12 +1,10 @@
 from datetime import datetime
+
+from django.core.exceptions import ValidationError
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.core.validators import (
-    MaxValueValidator,
-    MinValueValidator,
-    RegexValidator
-)
 
 from users.models import User
 
@@ -22,9 +20,9 @@ class Category(models.Model):
     name = models.CharField('Имя', max_length=256)
     slug = models.SlugField('Слаг', unique=True, max_length=50, validators=[
         RegexValidator(
-            regex=r'^[-a-zA-Z0-9_]+$',
-            message='Недопустимые символы'),
-    ], )
+            regex=r'^[-a-zA-Z0-9_]+$', message='Недопустимые символы'
+        )]
+    )
 
     def __str__(self):
         return self.name
@@ -34,9 +32,9 @@ class Genre(models.Model):
     name = models.CharField('Имя', max_length=256)
     slug = models.SlugField('Слаг', unique=True, max_length=50, validators=[
         RegexValidator(
-            regex=r'^[-a-zA-Z0-9_]+$',
-            message='Недопустимые символы'),
-    ], )
+            regex=r'^[-a-zA-Z0-9_]+$', message='Недопустимые символы'
+        )]
+    )
 
     def __str__(self):
         return self.name
@@ -86,7 +84,6 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
-    """Отзывы пользователей."""
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
@@ -126,8 +123,6 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    """Комментарии к отзывам."""
-
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments',
