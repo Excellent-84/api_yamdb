@@ -51,24 +51,18 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         read_only=True,
         many=False
     )
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True
-    )
     score = serializers.IntegerField(max_value=10, min_value=1)
 
     def validate(self, data):
-        request = self.context.get('request')
-
-        if request.method == 'POST':
-            title_id = self.context['view'].kwargs.get('title_id')
-            title = get_object_or_404(Title, pk=title_id)
-        if Review.objects.filter(
-                author=request.user, title=title
-        ).exists():
-            raise serializers.ValidationError(
-                'Ваш отзыв уже есть!'
-            )
+        if self.context.get('request').method == 'POST':
+            if Review.objects.filter(
+                title=get_object_or_404(
+                    Title,
+                    id=self.context['view'].kwargs.get('title_id')
+                ),
+                author=self.context['request'].user
+            ).exists():
+                raise serializers.ValidationError("Ваш отзыв уже есть!")
         return data
 
     def validate_year(self, value):
@@ -92,4 +86,4 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only = ('review',)
+        read_only_fields = ('review',)
