@@ -130,3 +130,6 @@ SIMPLE_JWT = {
 }
 
 EMAIL_HOST = 'yamdb@yamdb.ru'
+
+MIN_VALUE_SCORE = 1
+MAX_VALUE_SCORE = 10

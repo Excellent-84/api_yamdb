@@ -61,6 +61,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_title().reviews.all()
+    # без .all не работает, падают тесты
 
     def perform_create(self, serializer):
         serializer.save(
@@ -81,6 +82,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_review().comments.all()
+    # без .all не работает, падают тесты
 
     def perform_create(self, serializer):
         serializer.save(
