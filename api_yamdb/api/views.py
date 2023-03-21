@@ -11,7 +11,7 @@ from .serializers import (ReviewCreateSerializer, CommentSerializer,
                           TitleGetSerializer, TitlePostSerializer)
 from .filter import TitleFilter
 
-from reviews.models import Review, Category, Genre, Title
+from reviews.models import Review, Category, Comment, Genre, Title
 
 
 class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
@@ -61,7 +61,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return self.get_title().reviews.all()
+        title = self.get_title()
+        queryset = Review.objects.filter(title=title)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(
@@ -81,9 +83,11 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return self.get_review().comments.all()
+        review = self.get_review()
+        queryset = Comment.objects.filter(review=review)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(
-            author=self.request.user, reviews=self.get_review()
+            author=self.request.user, review=self.get_review()
         )

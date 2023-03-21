@@ -1,6 +1,5 @@
 from datetime import datetime
 from django.db import models
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxValueValidator,
@@ -8,6 +7,7 @@ from django.core.validators import (
     RegexValidator
 )
 
+from api_yamdb.settings import LENG_CUT, LENG_MAX
 from users.models import User
 
 
@@ -85,18 +85,36 @@ class GenreTitle(models.Model):
         return f'{self.title} - {self.genre}'
 
 
-class Review(models.Model):
+class ReviewAndCommentModel(models.Model):
+    """Модель для наследования."""
+
+    text = models.CharField(
+        max_length=LENG_MAX
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации отзыва',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:LENG_CUT]
+
+
+class Review(ReviewAndCommentModel):
     """Отзывы пользователей."""
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Рецензируемое произведение'
-    )
-    text = models.TextField(verbose_name='Текст отзыва')
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор отзыва',
     )
     score = models.IntegerField(
         'Оценка (от 1 до 10)',
@@ -105,13 +123,8 @@ class Review(models.Model):
             MinValueValidator(1)
         ]
     )
-    pub_date = models.DateField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
 
-    class Meta:
-        ordering = ['-pub_date']
+    class Meta(ReviewAndCommentModel.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -122,10 +135,10 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text
+        return self.text[:LENG_CUT]
 
 
-class Comment(models.Model):
+class Comment(ReviewAndCommentModel):
     """Комментарии к отзывам."""
 
     review = models.ForeignKey(
@@ -133,24 +146,11 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Комментируемый отзыв'
     )
-    text = models.TextField(
-        max_length=2000,
-        verbose_name='Текст комментария'
-    )
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор комментария'
-    )
-    pub_date = models.DateTimeField(
-        default=timezone.now,
-        verbose_name='Дата создания комментария'
-    )
 
-    class Meta:
+    class Meta(ReviewAndCommentModel.Meta):
         ordering = ('review', 'author')
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text
+        return self.text[:LENG_CUT]

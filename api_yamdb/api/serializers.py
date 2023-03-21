@@ -1,9 +1,8 @@
-import datetime
-
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import Review, Comment, Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
+
+from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -25,7 +24,9 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -49,38 +50,23 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        many=False
     )
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True
-    )
-    score = serializers.IntegerField(max_value=10, min_value=1)
+    score = serializers.IntegerField(max_value=MAX_VALUE_SCORE,
+                                     min_value=MIN_VALUE_SCORE)
 
     def validate(self, data):
-        request = self.context.get('request')
-
-        if request.method == 'POST':
+        if self.context.get('request').method == 'POST':
             title_id = self.context['view'].kwargs.get('title_id')
-            title = get_object_or_404(Title, pk=title_id)
-        if Review.objects.filter(
-                author=request.user, title=title
-        ).exists():
-            raise serializers.ValidationError(
-                'Ваш отзыв уже есть!'
-            )
+            user = self.context['request'].user
+            if not Review.objects.filter(title_id=title_id,
+                                         author=user).exists():
+                return data
+            raise serializers.ValidationError('Ваш отзыв уже есть!')
         return data
-
-    def validate_year(self, value):
-        year = datetime.now().year
-        if value > year:
-            raise serializers.ValidationError('Проверьте год выпуска!')
-        return value
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only = ('id',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -92,4 +78,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only = ('review',)
