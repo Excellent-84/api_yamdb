@@ -13,34 +13,30 @@ from .serializers import (CategorySerializer, CommentSerializer,
 from reviews.models import Category, Genre, Review, Title
 
 
-class CategoryViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class BaseModelViewSet(ListModelMixin, CreateModelMixin,
+                       DestroyModelMixin, viewsets.GenericViewSet):
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class CategoryViewSet(BaseModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
-class GenreViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(BaseModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     queryset = (
-        Title.objects.all()
-        .annotate(rating=Avg("reviews__score"))
-        .order_by('-year', 'name')
+        Title.objects.annotate(rating=Avg('reviews__score'))
     )
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):

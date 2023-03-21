@@ -1,43 +1,35 @@
-from datetime import datetime
-
-from django.core.exceptions import ValidationError
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import (MaxValueValidator, MinValueValidator, )
 from django.db import models
 from django.utils import timezone
 
 from users.models import User
+from reviews.validators import validate_year
 
 
-def validate_year(value):
-    year = datetime.now().year
-    if value > year:
-        raise ValidationError('Проверьте год выпуска!')
-    return value
-
-
-class Category(models.Model):
+class BaseCategory(models.Model):
     name = models.CharField('Имя', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50, validators=[
-        RegexValidator(
-            regex=r'^[-a-zA-Z0-9_]+$', message='Недопустимые символы'
-        )]
-    )
+    slug = models.SlugField('Слаг', unique=True, max_length=50,
+                            )
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField('Имя', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50, validators=[
-        RegexValidator(
-            regex=r'^[-a-zA-Z0-9_]+$', message='Недопустимые символы'
-        )]
-    )
+class Category(BaseCategory):
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
-    def __str__(self):
-        return self.name
+
+class Genre(BaseCategory):
+    class Meta:
+        ordering = ('name',)
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
@@ -47,12 +39,14 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
+        through_fields=('title', 'genre'),
         related_name='titles'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name='titles'
     )
 
@@ -64,23 +58,11 @@ class GenreTitle(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='genre_titles'
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
-        related_name='genre_titles'
     )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['title', 'genre'],
-                name='unique_genre_title')
-        ]
-
-    def __str__(self):
-        return f'{self.title} - {self.genre}'
 
 
 class Review(models.Model):
