@@ -1,9 +1,35 @@
-import datetime
-
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.validators import validate_username
+from users.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class TokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True, max_length=150, validators=(validate_username,)
+    )
+
+    email = serializers.EmailField(
+        required=True, max_length=254
+    )
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,15 +45,16 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleGetSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True, many=False)
-    genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.FloatField()
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.IntegerField(required=False)
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
+        read_only_fields = fields
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -51,32 +78,23 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        many=False
     )
-    score = serializers.IntegerField(max_value=10, min_value=1)
+    score = serializers.IntegerField(max_value=MAX_VALUE_SCORE,
+                                     min_value=MIN_VALUE_SCORE)
 
     def validate(self, data):
         if self.context.get('request').method == 'POST':
-            if Review.objects.filter(
-                title=get_object_or_404(
-                    Title,
-                    id=self.context['view'].kwargs.get('title_id')
-                ),
-                author=self.context['request'].user
-            ).exists():
-                raise serializers.ValidationError("Ваш отзыв уже есть!")
+            title_id = self.context['view'].kwargs.get('title_id')
+            user = self.context['request'].user
+            if not Review.objects.filter(title_id=title_id,
+                                         author=user).exists():
+                return data
+            raise serializers.ValidationError('Ваш отзыв уже есть!')
         return data
-
-    def validate_year(self, value):
-        year = datetime.now().year
-        if value > year:
-            raise serializers.ValidationError('Проверьте год выпуска!')
-        return value
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only = ('id',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -88,4 +106,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('review',)
