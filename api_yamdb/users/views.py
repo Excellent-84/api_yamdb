@@ -3,6 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
@@ -42,40 +43,26 @@ class UserViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def signup(request):
-    username = request.data.get('username')
+    serializer = SignUpSerializer(data=request.data)
     confirmation_code = str(uuid.uuid4())
-    if not User.objects.filter(username=username).exists():
-        serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        send_mail(
-            'Код подтверждения регистрации',
-            confirmation_code,
-            settings.EMAIL_HOST,
-            [serializer.data['email']]
-        )
-        return Response(
-            serializer.data, status=status.HTTP_200_OK
-        )
-    user = get_object_or_404(User, username=username)
-    serializer = SignUpSerializer(
-        user, data=request.data, partial=True
-    )
     serializer.is_valid(raise_exception=True)
-    if serializer.validated_data['email'] == user.email:
-        serializer.save(role=user.role)
-        send_mail(
-            'Код подтверждения регистрации',
-            confirmation_code,
-            settings.EMAIL_HOST,
-            [serializer.data['email']]
-        )
+    try:
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+    except IntegrityError:
         return Response(
-            serializer.data, status=status.HTTP_200_OK
+            'Ошибка в паре username-email',
+            status=status.HTTP_400_BAD_REQUEST
         )
+    confirmation_code = confirmation_code
+    user.save()
+    send_mail(
+        'Код подтверждения регистрации',
+        confirmation_code,
+        settings.EMAIL_HOST,
+        [serializer.data['email']]
+    )
     return Response(
-        'Ошибка обязательного поля',
-        status=status.HTTP_400_BAD_REQUEST
+        serializer.data, status=status.HTTP_200_OK
     )
 
 
@@ -83,17 +70,12 @@ def signup(request):
 def get_token(request):
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    try:
-        user = get_object_or_404(
+    user = get_object_or_404(
             User, username=serializer.validated_data['username']
-        )
-    except User.DoesNotExist:
-        return Response(
-            'Пользователь не найден', status=status.HTTP_404_NOT_FOUND
         )
     if (serializer.validated_data['confirmation_code']
        == user.confirmation_code):
-        token = default_token_generator.make_token(user)
+        token = default_token_generator.AccessToken(user)
         return Response(
             {'token': str(token)}, status=status.HTTP_201_CREATED
         )
