@@ -3,7 +3,9 @@ import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from .validators import validate_username
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -89,3 +91,29 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('review',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class TokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True, max_length=150,  validators=(validate_username,)
+    )
+
+    email = serializers.EmailField(
+        required=True, max_length=254
+    )
