@@ -6,11 +6,11 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 
 from .filter import TitleFilter
+from reviews.models import Review, Category, Comment, Genre, Title
 from .permissions import IsAdminOrReadOnly, IsAuthorOrModerOrAdmin
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewCreateSerializer,
                           TitleGetSerializer, TitlePostSerializer)
-from reviews.models import Category, Genre, Review, Title
 
 
 class BaseModelViewSet(ListModelMixin, CreateModelMixin,
@@ -56,7 +56,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return self.get_title().reviews.all()
+        title = self.get_title()
+        queryset = Review.objects.filter(title=title)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(
@@ -76,7 +78,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
     def get_queryset(self):
-        return self.get_review().comments.all()
+        review = self.get_review()
+        queryset = Comment.objects.filter(review=review)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(

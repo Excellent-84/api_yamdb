@@ -1,9 +1,7 @@
-import datetime
-
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
+from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -52,32 +50,23 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        many=False
     )
-    score = serializers.IntegerField(max_value=10, min_value=1)
+    score = serializers.IntegerField(max_value=MAX_VALUE_SCORE,
+                                     min_value=MIN_VALUE_SCORE)
 
     def validate(self, data):
         if self.context.get('request').method == 'POST':
-            if Review.objects.filter(
-                title=get_object_or_404(
-                    Title,
-                    id=self.context['view'].kwargs.get('title_id')
-                ),
-                author=self.context['request'].user
-            ).exists():
-                raise serializers.ValidationError("Ваш отзыв уже есть!")
+            title_id = self.context['view'].kwargs.get('title_id')
+            user = self.context['request'].user
+            if not Review.objects.filter(title_id=title_id,
+                                         author=user).exists():
+                return data
+            raise serializers.ValidationError('Ваш отзыв уже есть!')
         return data
-
-    def validate_year(self, value):
-        year = datetime.now().year
-        if value > year:
-            raise serializers.ValidationError('Проверьте год выпуска!')
-        return value
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only = ('id',)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -89,4 +78,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('review',)

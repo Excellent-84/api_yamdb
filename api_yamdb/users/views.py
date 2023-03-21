@@ -24,6 +24,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+
     @action(
         ['GET', 'PATCH'],
         detail=False,
