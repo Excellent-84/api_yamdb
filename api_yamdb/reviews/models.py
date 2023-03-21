@@ -1,12 +1,9 @@
-from django.core.validators import (MaxValueValidator, MinValueValidator, )
 from django.db import models
-from django.core.exceptions import ValidationError
+
 from django.core.validators import (
     MaxValueValidator,
     MinValueValidator,
-    RegexValidator
 )
-from django.utils import timezone
 
 from api_yamdb.settings import LENG_CUT, LENG_MAX
 from users.models import User
@@ -96,7 +93,7 @@ class ReviewAndCommentModel(models.Model):
         return self.text[:LENG_CUT]
 
 
-class Review(models.Model):
+class Review(ReviewAndCommentModel):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
@@ -124,7 +121,7 @@ class Review(models.Model):
         return self.text[:LENG_CUT]
 
 
-class Comment(models.Model):
+class Comment(ReviewAndCommentModel):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments',
