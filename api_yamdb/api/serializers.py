@@ -1,7 +1,35 @@
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, Review, Title
 from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
+from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.validators import validate_username
+from users.models import User
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class TokenSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True, max_length=150, validators=(validate_username,)
+    )
+
+    email = serializers.EmailField(
+        required=True, max_length=254
+    )
 
 
 class CategorySerializer(serializers.ModelSerializer):
