@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
-
 from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
 
 
@@ -18,15 +17,16 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleGetSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(read_only=True, many=False)
-    genre = GenreSerializer(read_only=True, many=True)
-    rating = serializers.FloatField()
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.IntegerField(required=False)
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
+        read_only_fields = fields
 
 
 class TitlePostSerializer(serializers.ModelSerializer):

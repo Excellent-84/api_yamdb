@@ -1,6 +1,6 @@
 import uuid
-from django.conf import settings
 
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -11,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User
-from .permissions import IsAdmin
-from .serializers import SignUpSerializers, TokenSerializers, UserSerializer
+from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from api.permissions import IsAdmin
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -22,7 +22,8 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
+
 
     @action(
         ['GET', 'PATCH'],
@@ -31,9 +32,12 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         user = get_object_or_404(User, pk=request.user.id)
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(role=user.role)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=user.role)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -42,7 +46,7 @@ def signup(request):
     username = request.data.get('username')
     confirmation_code = str(uuid.uuid4())
     if not User.objects.filter(username=username).exists():
-        serializer = SignUpSerializers(data=request.data)
+        serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         send_mail(
@@ -55,7 +59,7 @@ def signup(request):
             serializer.data, status=status.HTTP_200_OK
         )
     user = get_object_or_404(User, username=username)
-    serializer = SignUpSerializers(
+    serializer = SignUpSerializer(
         user, data=request.data, partial=True
     )
     serializer.is_valid(raise_exception=True)
@@ -78,7 +82,7 @@ def signup(request):
 
 @api_view(['POST'])
 def get_token(request):
-    serializer = TokenSerializers(data=request.data)
+    serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
         user = get_object_or_404(
