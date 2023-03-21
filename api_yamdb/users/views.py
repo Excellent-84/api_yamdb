@@ -24,7 +24,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-
     @action(
         ['GET', 'PATCH'],
         detail=False,
@@ -93,7 +92,7 @@ def get_token(request):
             'Пользователь не найден', status=status.HTTP_404_NOT_FOUND
         )
     if (serializer.validated_data['confirmation_code']
-       == user.confirmation_code):
+            == user.confirmation_code):
         token = default_token_generator.make_token(user)
         return Response(
             {'token': str(token)}, status=status.HTTP_201_CREATED
