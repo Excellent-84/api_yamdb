@@ -16,11 +16,43 @@ API YaMDb позволяет работать со следующими сущн
 
 ## Участники проекта:
 
-[@Excellent-84](https://github.com/Excellent-84) - управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля;
+[Excellent-84](https://github.com/Excellent-84) - управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля;
 
-[@BelovRV89](https://github.com/BelovRV89) - категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них;
+[BelovRV89](https://github.com/BelovRV89) - категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них;
 
-[@Александр Малахов] - отзывы (Review) и комментарии (Comments): модели и view, эндпойнты, права доступа для запросов. Рейтинги произведений.
+[Александр Малахов](https://github.com/Richa9d) - отзывы (Review) и комментарии (Comments): модели и view, эндпойнты, права доступа для запросов. Рейтинги произведений.
+
+## Используемые технологии:
+
+  - Python 3.7+
+  - Django 3.2
+  - PyJWT 2.1.0
+  - asgiref 3.6.0
+  - attrs 22.2.0
+  - certifi 2022.12.7
+  - charset-normalizer 2.0.12
+  - django-filter 22.1
+  - djangorestframework 3.12.4
+  - djangorestframework-simplejwt 5.2.2
+  - flake8 6.0.0
+  - idna 3.4
+  - iniconfig 2.0.0
+  - mccabe 0.7.0
+  - packaging 23.0
+  - pluggy 0.13.1
+  - py 1.11.0
+  - pycodestyle 2.10.0
+  - pyflakes 3.0.1
+  - pytest 6.2.4
+  - pytest-django 4.4.0
+  - pytest-pythonpath 0.7.3
+  - pytz 2022.7.1
+  - requests 2.26.0
+  - rest-framework-simplejwt 0.0.1
+  - sqlparse 0.4.3
+  - toml 0.10.2
+  - urllib3 1.26.15
+
 
 ## Начало работы:
 
@@ -46,4 +78,25 @@ python3 manage.py migrate
 ```
 python3 manage.py runserver
 ```
+  - Импорт БД из csv файла:
+```
+python3 manage.py import_data
+```
 
+## Пример запроса:
+
+##### Добавление жанра
+POST запрос http://{ip-адрес}/api/v1/genres/
+```
+{
+"name": "string",
+"slug": "string"
+}
+```
+##### Ответ
+```
+{
+"name": "string",
+"slug": "string"
+}
+```
