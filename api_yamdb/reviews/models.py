@@ -1,37 +1,33 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
-from django.core.validators import (
-    MaxValueValidator,
-    MinValueValidator,
-)
-
-from api_yamdb.settings import LENG_CUT, LENG_MAX
+from api_yamdb.settings import (LENG_CUT, LENG_MAX,
+                                MAX_VALUE_SCORE, MIN_VALUE_SCORE)
 from users.models import User
 from reviews.validators import validate_year
 
 
-class BaseCategory(models.Model):
+class CategoryGenreBase(models.Model):
     name = models.CharField('Имя', max_length=256)
     slug = models.SlugField('Слаг', unique=True, max_length=50,
                             )
 
     class Meta:
         abstract = True
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
-class Category(BaseCategory):
-    class Meta:
-        ordering = ('name',)
+class Category(CategoryGenreBase):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
-class Genre(BaseCategory):
-    class Meta:
-        ordering = ('name',)
+class Genre(CategoryGenreBase):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -69,7 +65,7 @@ class GenreTitle(models.Model):
     )
 
 
-class ReviewAndCommentModel(models.Model):
+class ReviewAndCommentBase(models.Model):
     """Модель для наследования."""
 
     text = models.CharField(
@@ -89,11 +85,8 @@ class ReviewAndCommentModel(models.Model):
         abstract = True
         ordering = ('-pub_date',)
 
-    def __str__(self):
-        return self.text[:LENG_CUT]
 
-
-class Review(ReviewAndCommentModel):
+class Review(ReviewAndCommentBase):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
@@ -102,12 +95,12 @@ class Review(ReviewAndCommentModel):
     score = models.IntegerField(
         'Оценка (от 1 до 10)',
         validators=[
-            MaxValueValidator(10),
-            MinValueValidator(1)
+            MaxValueValidator(MAX_VALUE_SCORE),
+            MinValueValidator(MIN_VALUE_SCORE)
         ]
     )
 
-    class Meta(ReviewAndCommentModel.Meta):
+    class Meta(ReviewAndCommentBase.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -121,17 +114,14 @@ class Review(ReviewAndCommentModel):
         return self.text[:LENG_CUT]
 
 
-class Comment(ReviewAndCommentModel):
+class Comment(ReviewAndCommentBase):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Комментируемый отзыв'
     )
 
-    class Meta(ReviewAndCommentModel.Meta):
+    class Meta(ReviewAndCommentBase.Meta):
         ordering = ('review', 'author')
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-
-    def __str__(self):
-        return self.text[:LENG_CUT]
