@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from api_yamdb.settings import MIN_VALUE_SCORE, MAX_VALUE_SCORE
@@ -83,12 +84,13 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
                                      min_value=MIN_VALUE_SCORE)
 
     def validate(self, data):
-        if self.context.get('request').method == 'POST':
-            title_id = self.context['view'].kwargs.get('title_id')
-            user = self.context['request'].user
-            if not Review.objects.filter(title_id=title_id,
-                                         author=user).exists():
-                return data
+        if not self.context.get('request').method == 'POST':
+            return data
+        if Review.objects.filter(
+            title=get_object_or_404(
+                Title,
+                id=self.context['view'].kwargs.get('title_id')),
+                author=self.context['request'].user).exists():
             raise serializers.ValidationError('Ваш отзыв уже есть!')
         return data
 
