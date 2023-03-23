@@ -10,28 +10,27 @@ from users.models import User
 from reviews.validators import validate_year
 
 
-class BaseCategory(models.Model):
+class CategoryGenreBase(models.Model):
     name = models.CharField('Имя', max_length=256)
     slug = models.SlugField('Слаг', unique=True, max_length=50,
                             )
 
     class Meta:
         abstract = True
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
-class Category(BaseCategory):
-    class Meta:
-        ordering = ('name',)
+class Category(CategoryGenreBase):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
-class Genre(BaseCategory):
-    class Meta:
-        ordering = ('name',)
+class Genre(CategoryGenreBase):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
