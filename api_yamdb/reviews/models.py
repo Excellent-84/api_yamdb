@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from api_yamdb.settings import (LENG_CUT, LENG_MAX,
@@ -95,8 +96,8 @@ class Review(ReviewAndCommentBase):
     score = models.IntegerField(
         'Оценка (от 1 до 10)',
         validators=[
-            MAX_VALUE_SCORE,
-            MIN_VALUE_SCORE
+            MaxValueValidator(MAX_VALUE_SCORE),
+            MinValueValidator(MIN_VALUE_SCORE)
         ]
     )
 
