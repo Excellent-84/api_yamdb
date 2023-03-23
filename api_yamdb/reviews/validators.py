@@ -3,6 +3,8 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 
+from api_yamdb.settings import RESERVED_NAMES, REGULAR_CHECK_LOGIN_VALID
+
 
 def validate_year(value):
     year = datetime.now().year
@@ -12,10 +14,14 @@ def validate_year(value):
 
 
 def validate_username(username):
-    if username.lower() == 'me':
+    if username.lower() == RESERVED_NAMES:
         raise ValidationError(
-            'Использовать логин "me" запрещено'
+            'Зарезервированный логин, нельзя использлвать'
         )
-    if not re.match(r'^[\w.@+-]+\Z', username):
-        raise ValidationError('Недопустимые символы в логине')
+    if not re.match(REGULAR_CHECK_LOGIN_VALID, username):
+        raise ValidationError(
+            'В логине нельзя использовать символы, отличные от букв'
+            'в верхнем и нижнем регистрах, цифр, знаков подчеркивания,'
+            'точки, знаков плюса, минуса и собаки (@)'
+        )
     return username

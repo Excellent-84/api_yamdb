@@ -1,7 +1,6 @@
 import uuid
 
 from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
@@ -14,6 +13,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .filter import TitleFilter
 from .serializers import (
@@ -60,15 +60,16 @@ def signup(request):
         user, _ = User.objects.get_or_create(**serializer.validated_data)
     except IntegrityError:
         return Response(
-            'Ошибка обязательного поля',
+            'Такой "username" или "e-mail" уже заняты',
             status=status.HTTP_400_BAD_REQUEST
         )
+    user.confirmation_code = confirmation_code
     user.save()
     send_mail(
         'Код подтверждения регистрации',
-        confirmation_code,
+        user.confirmation_code,
         settings.EMAIL_HOST,
-        [serializer.data['email']]
+        [serializer.validated_data.get('email')]
     )
     return Response(
         serializer.data, status=status.HTTP_200_OK
@@ -82,11 +83,9 @@ def get_token(request):
     user = get_object_or_404(
         User, username=serializer.validated_data['username']
     )
-    if not user:
-        raise ('Пользователь не найден')
     if (serializer.validated_data['confirmation_code']
        == user.confirmation_code):
-        token = default_token_generator.AccessToken(user)
+        token = AccessToken.for_user(user)
         return Response(
             {'token': str(token)}, status=status.HTTP_201_CREATED
         )

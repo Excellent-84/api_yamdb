@@ -5,6 +5,8 @@ from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
                     TitleViewSet, ReviewViewSet, UserViewSet,
                     get_token, signup)
 
+app_name = 'api'
+
 router = routers.DefaultRouter()
 
 router.register(
@@ -19,7 +21,6 @@ router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
 router.register('titles', TitleViewSet, basename='titles')
 router.register('users', UserViewSet, basename='users')
-
 
 auth_urls = [
     path('token/', get_token, name='get_token'),
