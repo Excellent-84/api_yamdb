@@ -85,18 +85,71 @@ python3 manage.py import_data
 
 ## Пример запроса:
 
+##### Регистрация нового пользователя:
+POST запрос http://{ip-адрес}/api/v1/auth/signup/
+```
+{
+    "email": "user@example.com",
+    "username": "user"
+}
+```
+##### Ответ:
+```
+{
+    "email": "user@example.com",
+    "username": "user"
+}
+```
+##### Получение JWT-токена:
+POST запрос http://{ip-адрес}/api/v1/auth/token/
+```
+{
+    "confirmation_code": "str71ddb36c-xxxx-xxxx-xxxx-xxxxxxx",
+    "username": "user"
+}
+```
+##### Ответ:
+```
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.XXXXXXX"
+}
+```
 ##### Добавление жанра
 POST запрос http://{ip-адрес}/api/v1/genres/
 ```
 {
-"name": "string",
-"slug": "string"
+    "name": "Комедия",
+    "slug": "comedy"
 }
 ```
 ##### Ответ
 ```
 {
-"name": "string",
-"slug": "string"
+    "name": "Комедия",
+    "slug": "comedy"
 }
 ```
+##### Получение списка всех жанров
+GET запрос http://{ip-адрес}/api/v1/genres/
+
+##### Ответ
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "name": "Комедия",
+            "slug": "comedies"
+        },
+        {
+            "name": "Комедия",
+            "slug": "comedy"
+        }
+    ]
+}
+##### Удаление жанра
+DELETE запрос http://{ip-адрес}/api/v1/genres/comedy/
+
+##### Подробную версию запросов можно посмотреть по адресу:
+http://{ip-адрес}/redoc/

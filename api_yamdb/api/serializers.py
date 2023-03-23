@@ -15,20 +15,19 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class TokenSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        max_length=150
+    )
+    confirmation_code = serializers.CharField(required=True)
 
 
 class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(
-        required=True, max_length=150, validators=(validate_username,)
+        max_length=150, validators=(validate_username,)
     )
-
     email = serializers.EmailField(
-        required=True, max_length=254
+        max_length=254
     )
 
 

@@ -24,7 +24,8 @@ class User(AbstractUser):
         'Биография', blank=True
     )
     role = models.CharField(
-        'Роль', max_length=20, choices=ROLE_CHOICES, default=USER)
+        'Роль', max_length=20, choices=ROLE_CHOICES, default=USER
+    )
     confirmation_code = models.CharField(
         'Код подтверждения', max_length=50, blank=True
     )
