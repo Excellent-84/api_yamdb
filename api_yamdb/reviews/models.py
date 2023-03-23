@@ -1,5 +1,5 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from api_yamdb.settings import (LENG_CUT, LENG_MAX,
                                 MAX_VALUE_SCORE, MIN_VALUE_SCORE)
