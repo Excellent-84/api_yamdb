@@ -19,7 +19,8 @@ from .filter import TitleFilter
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
     ReviewCreateSerializer, SignUpSerializer, TitleGetSerializer,
-    TitlePostSerializer, TokenSerializer, UserSerializer
+    TitlePostSerializer, TokenSerializer, UserSerializer,
+    MeUserSerializer
 )
 from .permissions import IsAdmin, IsAdminOrReadOnly, IsAuthorOrModerOrAdmin
 from reviews.models import Category, Genre, Review, Title
@@ -43,11 +44,13 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         user = get_object_or_404(User, pk=request.user.id)
         if request.method == 'PATCH':
-            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer = MeUserSerializer(
+                user, data=request.data, partial=True
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save(role=user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = UserSerializer(request.user)
+        serializer = MeUserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
