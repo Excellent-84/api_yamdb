@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
-        max_length=150
+        max_length=150, validators=(validate_username,)
     )
     confirmation_code = serializers.CharField(required=True)
 

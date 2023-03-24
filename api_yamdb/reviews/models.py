@@ -9,8 +9,7 @@ from reviews.validators import validate_year
 
 class CategoryGenreBase(models.Model):
     name = models.CharField('Имя', max_length=256)
-    slug = models.SlugField('Слаг', unique=True, max_length=50,
-                            )
+    slug = models.SlugField('Слаг', unique=True, max_length=50)
 
     class Meta:
         abstract = True
@@ -65,7 +64,7 @@ class GenreTitle(models.Model):
     )
 
 
-class ReviewAndCommentBase(models.Model):
+class ReviewCommentBase(models.Model):
     """Модель для наследования."""
 
     text = models.CharField(
@@ -85,8 +84,11 @@ class ReviewAndCommentBase(models.Model):
         abstract = True
         ordering = ('-pub_date',)
 
+    def __str__(self):
+        return self.text[:LENG_CUT]
 
-class Review(ReviewAndCommentBase):
+
+class Review(ReviewCommentBase):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
@@ -100,7 +102,7 @@ class Review(ReviewAndCommentBase):
         ]
     )
 
-    class Meta(ReviewAndCommentBase.Meta):
+    class Meta(ReviewCommentBase.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = [
@@ -110,18 +112,15 @@ class Review(ReviewAndCommentBase):
             )
         ]
 
-    def __str__(self):
-        return self.text[:LENG_CUT]
 
-
-class Comment(ReviewAndCommentBase):
+class Comment(ReviewCommentBase):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Комментируемый отзыв'
     )
 
-    class Meta(ReviewAndCommentBase.Meta):
+    class Meta(ReviewCommentBase.Meta):
         ordering = ('review', 'author')
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
