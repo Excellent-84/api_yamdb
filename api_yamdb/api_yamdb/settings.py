@@ -134,7 +134,7 @@ EMAIL_HOST = 'yamdb@yamdb.ru'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
-RESERVED_NAMES = 'me'
+RESERVED_NAMES = ('me',)
 REGULAR_CHECK_LOGIN_VALID = r'^[\w.@+-]+\Z'
 
 MIN_VALUE_SCORE = 1

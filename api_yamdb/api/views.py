@@ -1,6 +1,5 @@
-import uuid
-
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
@@ -57,7 +56,6 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 def signup(request):
     serializer = SignUpSerializer(data=request.data)
-    confirmation_code = str(uuid.uuid4())
     serializer.is_valid(raise_exception=True)
     try:
         user, _ = User.objects.get_or_create(**serializer.validated_data)
@@ -66,6 +64,7 @@ def signup(request):
             'Такой "username" или "e-mail" уже заняты',
             status=status.HTTP_400_BAD_REQUEST
         )
+    confirmation_code = default_token_generator.make_token(user)
     user.confirmation_code = confirmation_code
     user.save()
     send_mail(
