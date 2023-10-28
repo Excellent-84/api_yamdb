@@ -1,8 +1,8 @@
-# Проект API YaMDb
+## Проект API YaMDb
 
 API YaMDb собирает отзывы пользователей на различные произведения такие как фильмы, книги и музыка.
 
-## Описание проекта:
+### Описание проекта:
 
 API YaMDb позволяет работать со следующими сущностями:
 
@@ -14,78 +14,54 @@ API YaMDb позволяет работать со следующими сущн
   - Отзывы (Review): получить список всех отзывов, создать новый отзыв, получить отзыв по id, частично обновить отзыв по id, удалить отзыв по id;
   - Комментарии (Comments) к отзывам: получить список всех комментариев к отзыву по id, создать новый комментарий для отзыва, получить комментарий для отзыва по id, частично обновить комментарий к отзыву по id, удалить комментарий к отзыву по id.
 
-## Участники проекта:
+### Участники проекта:
 
-[Excellent-84](https://github.com/Excellent-84) - управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля;
+[Горин Евгений](https://github.com/Excellent-84) - управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля;
 
-[BelovRV89](https://github.com/BelovRV89) - категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них;
+[Руслан Белов](https://github.com/BelovRV89) - категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них;
 
 [Александр Малахов](https://github.com/Richa9d) - отзывы (Review) и комментарии (Comments): модели и view, эндпойнты, права доступа для запросов. Рейтинги произведений.
 
-## Используемые технологии:
+### Используемые технологии:
 
-  - Python 3.7+
-  - Django 3.2
-  - PyJWT 2.1.0
-  - asgiref 3.6.0
-  - attrs 22.2.0
-  - certifi 2022.12.7
-  - charset-normalizer 2.0.12
-  - django-filter 22.1
-  - djangorestframework 3.12.4
-  - djangorestframework-simplejwt 5.2.2
-  - flake8 6.0.0
-  - idna 3.4
-  - iniconfig 2.0.0
-  - mccabe 0.7.0
-  - packaging 23.0
-  - pluggy 0.13.1
-  - py 1.11.0
-  - pycodestyle 2.10.0
-  - pyflakes 3.0.1
-  - pytest 6.2.4
-  - pytest-django 4.4.0
-  - pytest-pythonpath 0.7.3
-  - pytz 2022.7.1
-  - requests 2.26.0
-  - rest-framework-simplejwt 0.0.1
-  - sqlparse 0.4.3
-  - toml 0.10.2
-  - urllib3 1.26.15
+  - ##### Python
+  - ##### Django
+  - ##### Django REST Framework
 
+### Как запустить проект:
 
-## Начало работы:
-
-  - Клонировать репозиторий, перейти в директорию с проектом:
+  * ##### Клонировать репозиторий, перейти в директорию с проектом:
 ```
-git clone git@github.com:Excellent-84/api_yamdb.git
+git clone https://github.com/Excellent-84/api_yamdb.git
 ```
-  - Установить виртуальное окружение, активировать его:
+  * ##### Установить виртуальное окружение, активировать его:
 ```
-python -m venv venv
-sourse venv/bin/activate
+cd api_yamdb
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install --upgrade pip
 ```
-  - Перейти в директорию с приложением api_yamdb, установить зависимости:
+  * ##### Перейти в директорию с приложением api_yamdb, установить зависимости:
 ```
 pip install -r requirements.txt
 ```
-  - Выполнить миграции:
+  * ##### Выполнить миграции:
 ```
-cd api_yamdb/
+cd api_yamdb
 python3 manage.py migrate
 ```
-  - Запустить проект:
+  * ##### Запустить проект:
 ```
 python3 manage.py runserver
 ```
-  - Импорт БД из csv файла:
+  * ##### Импорт БД из csv файла:
 ```
 python3 manage.py import_data
 ```
 
-## Пример запроса:
+### Примеры запроса:
 
-##### Регистрация нового пользователя:
+#### Регистрация нового пользователя:
 POST запрос http://{ip-адрес}/api/v1/auth/signup/
 ```
 {
@@ -100,7 +76,7 @@ POST запрос http://{ip-адрес}/api/v1/auth/signup/
     "username": "user"
 }
 ```
-##### Получение JWT-токена:
+#### Получение JWT-токена:
 POST запрос http://{ip-адрес}/api/v1/auth/token/
 ```
 {
@@ -114,7 +90,7 @@ POST запрос http://{ip-адрес}/api/v1/auth/token/
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.XXXXXXX"
 }
 ```
-##### Добавление жанра
+#### Добавление жанра:
 POST запрос http://{ip-адрес}/api/v1/genres/
 ```
 {
@@ -122,14 +98,14 @@ POST запрос http://{ip-адрес}/api/v1/genres/
     "slug": "comedy"
 }
 ```
-##### Ответ
+##### Ответ:
 ```
 {
     "name": "Комедия",
     "slug": "comedy"
 }
 ```
-##### Получение списка всех жанров
+#### Получение списка всех жанров:
 GET запрос http://{ip-адрес}/api/v1/genres/
 
 ##### Ответ
@@ -148,8 +124,8 @@ GET запрос http://{ip-адрес}/api/v1/genres/
         }
     ]
 }
-##### Удаление жанра
+#### Удаление жанра:
 DELETE запрос http://{ip-адрес}/api/v1/genres/comedy/
 
-##### Подробную версию запросов можно посмотреть по адресу:
+#### Подробную версию запросов можно посмотреть по адресу:
 http://{ip-адрес}/redoc/
